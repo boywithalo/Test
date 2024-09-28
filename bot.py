@@ -7,6 +7,23 @@ bot = telebot.TeleBot(token)
 def start(message):
     bot.reply_to(message, "⚪ver 1.1⚪")
 
+
+@bot.message_handler(func=lambda message: True) 
+def check_for_link(message):
+    if "https://" in message.text:
+        chat_id = message.chat.id
+        user_id = message.from_user.id
+        user_status = bot.get_chat_member(chat_id, user_id).status
+        if user_status == 'administrator' or user_status == 'creator':
+            bot.send_message(message.chat.id, "Could not ban this member.")
+        else:
+            bot.ban_chat_member(chat_id, user_id)
+    
+@bot.message_handler(content_types=['new_chat_members'])
+def make_some(message):
+    bot.send_message(message.chat.id, 'I accepted a new user!')
+    bot.approve_chat_join_request(message.chat.id, message.from_user.id)
+
 @bot.message_handler(commands=['ban'])
 def ban_user(message):
     if message.reply_to_message: #проверка на то, что эта команда была вызвана в ответ на сообщение 
